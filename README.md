@@ -8,4 +8,4 @@ So, the fixes include:
 - the main fix is to make the extension to execute the tests according to [the Vitest's official documentation](https://vitest.dev/guide/debugging.html)
 - to make it work for monorepos - detecting the project root by locating `package.json` file.
 
-![preview](https://github.com/kwai-explore/vscode-vitest-runner/blob/main/docs/preview.png?raw=true)
+![preview](https://github.com/amedveshchek/vscode-vitest-runner/blob/main/docs/preview.png?raw=true)
