@@ -1,7 +1,7 @@
 {
   "name": "vscode-vitest-runner-x",
   "displayName": "Vitest Runner X",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "main": "dist/index.js",
   "icon": "logo.png",
   "license": "MIT",
