@@ -1,12 +1,12 @@
 {
-  "name": "vscode-vitest-runner",
-  "displayName": "Vitest Runner",
+  "name": "vscode-vitest-runner-x",
+  "displayName": "Vitest Runner X",
   "version": "0.0.4",
   "main": "dist/index.js",
   "icon": "logo.png",
   "license": "MIT",
-  "description": "Vitest case runner.",
-  "publisher": "kingwl",
+  "description": "Vitest runner X",
+  "publisher": "amedveshchek",
   "engines": {
     "vscode": "^1.65.0"
   },
@@ -28,6 +28,7 @@
     "onLanguage:javascriptreact"
   ],
   "devDependencies": {
+    "@types/node": "^20.4.9",
     "@types/vscode": "^1.65.0",
     "esbuild": "^0.14.27",
     "prettier": "^2.6.0",
