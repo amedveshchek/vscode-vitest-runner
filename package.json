@@ -6,7 +6,7 @@
   "icon": "logo.png",
   "license": "MIT",
   "description": "Vitest runner X",
-  "publisher": "amedveshchek",
+  "publisher": "AlexM",
   "engines": {
     "vscode": "^1.65.0"
   },
