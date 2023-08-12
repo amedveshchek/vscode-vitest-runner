@@ -39,29 +39,44 @@ function buildDebugConfig(props: {
 
     // https://vitest.dev/guide/debugging.html
     return {
-        "type": "node",
+        "type": "pwa-node",
         "request": "launch",
-        "name": "Vitest",
+        "name": "Vitest Typescript",
         "autoAttachChildProcesses": true,
         "skipFiles": [
             "<node_internals>/**",
             "**/node_modules/**"
         ],
+        "cwd": cwd,
+        "runtimeExecutable": "npx",
         "program": `${cwd}/node_modules/vitest/vitest.mjs`,
         "args": [
             "run",
-            "${relativeFile}",
-            "--testNamePattern",
-            getTestCasePatternRegexp(props.testCaseName),
+            "--root", cwd,
+            "--testNamePattern", getTestCasePatternRegexp(props.testCaseName),
+            props.filename,
         ],
         "smartStep": true,
-        "preLaunchTask": props.preLaunchTask, // "${defaultBuildTask}",
-        "console": "integratedTerminal",
-        "outFiles": [
-            "${workspaceFolder}/out/**/*.js"
+        // Environment variables passed to the program.
+        "env": {
+            "NODE_ENV": "development"
+        },
+        // Use JavaScript source maps (if they exist).
+        "sourceMaps": true,
+        "resolveSourceMapLocations": [
+            `${cwd}/**`,
+            `!${cwd}/**/node_modules/**`,
         ],
+        "outDir": `${cwd}`,
+        "console": "integratedTerminal",
         "noDebug": props.noDebug ?? false,
         "justMyCode": justMyCode,
+        "stopOnEntry": false,
+        // "preLaunchTask": `tsc: build -p ${cwd}/tsconfig.json`,   // ingore, as it's not always configured
+        // "outFiles": [                                            // autodetected
+        //     `${cwd}/dist/**/*.js`,
+        //     `${cwd}/dist/**/*.js.map`,
+        // ],
     }
 }
 
