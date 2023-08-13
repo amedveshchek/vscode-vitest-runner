@@ -24,7 +24,10 @@ function getNodeProjectRootPath(filePath: string): string {
 }
 
 function getTestCasePatternRegexp(testCase: TestCase): string {
-    const caseNamePath = [...testCase.parentTexts, testCase.text].join(' ');
+    let caseNamePath = [...testCase.parentTexts, testCase.text].join(' ');
+    // escape all the regexp special chars with '\'
+    caseNamePath = caseNamePath.replace(/[*+?$^()[\]{}."]/g, '\\$&');
+
     if (testCase.type === 'describe') {
         return `^ ${caseNamePath} `;
     } else if (testCase.type === 'it' || testCase.type === 'test') {
