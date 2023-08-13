@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as path from 'path';
+import { TestCase } from './types';
 
 function getNodeProjectRootPath(filePath: string): string {
     let fileDir = path.dirname(filePath);
@@ -22,20 +23,27 @@ function getNodeProjectRootPath(filePath: string): string {
     return path.resolve(rootPath);
 }
 
-function getTestCasePatternRegexp(testCaseName: string): string {
-    return ` ${testCaseName}($| )`; // TODO: make it better, determine what is the real test case name in vitest.mjs
+function getTestCasePatternRegexp(testCase: TestCase): string {
+    const caseNamePath = [...testCase.parentTexts, testCase.text].join(' ');
+    if (testCase.type === 'describe') {
+        return `^ ${caseNamePath} `;
+    } else if (testCase.type === 'it' || testCase.type === 'test') {
+        return `^ ${caseNamePath}$`;
+    } else {
+        throw new Error(`Unknown test case type '${testCase.type}`);
+    }
 }
 
 function buildDebugConfig(props: {
-    testCaseName: string,
-    filename: string,
+    testCase: TestCase,
     noDebug?: boolean,          // https://microsoft.github.io/debug-adapter-protocol//specification.html
     notJustMyCode?: boolean,    // https://code.visualstudio.com/docs/python/debugging#_justmycode
     preLaunchTask?: string,     // https://code.visualstudio.com/docs/editor/debugging#_launchjson-attributes
 }): vscode.DebugConfiguration {
-    const cwd = getNodeProjectRootPath(props.filename);
+    const cwd = getNodeProjectRootPath(props.testCase.fileName);
 
     const justMyCode = !(props.notJustMyCode ?? false);
+    const testNamePattern = getTestCasePatternRegexp(props.testCase);
 
     // https://vitest.dev/guide/debugging.html
     return {
@@ -53,8 +61,8 @@ function buildDebugConfig(props: {
         "args": [
             "run",
             "--root", cwd,
-            "--testNamePattern", getTestCasePatternRegexp(props.testCaseName),
-            props.filename,
+            "--testNamePattern", testNamePattern,
+            props.testCase.fileName,
         ],
         "smartStep": true,
         // Environment variables passed to the program.
@@ -80,19 +88,17 @@ function buildDebugConfig(props: {
     }
 }
 
-export function runInTerminal(testCaseName: string, filename: string) {
+export function runInTerminal(testCase: TestCase) {
     const config = buildDebugConfig({
-        testCaseName: testCaseName,
-        filename: filename,
+        testCase: testCase,
         noDebug: true,
     });
     vscode.debug.startDebugging(undefined, config);
 }
 
-export function debugInTermial(testCaseName: string, filename: string) {
+export function debugInTermial(testCase: TestCase) {
     const config = buildDebugConfig({
-        testCaseName: testCaseName,
-        filename: filename,
+        testCase: testCase,
     });
     vscode.debug.startDebugging(undefined, config);
 }

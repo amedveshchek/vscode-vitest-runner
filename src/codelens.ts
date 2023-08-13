@@ -1,16 +1,24 @@
 import type * as ts from 'typescript';
 import * as vscode from 'vscode';
-import { TextCase } from './types';
+import { TestCase, TestCaseType } from './types';
 import { flatMap } from './utils';
 import { RunVitestCommand, DebugVitestCommand } from './vscode';
 
-const caseText = new Set(['it', 'describe','test']);
+const caseText = new Set(['it', 'describe', 'test']);
 
 function tryGetVitestTestCase(
     typescript: typeof ts,
-    callExpression: ts.CallExpression,
-    file: ts.SourceFile
-): TextCase | undefined {
+    node: ts.Node,
+    file: ts.SourceFile,
+    fileName: string,
+    parentTexts: string[],
+): TestCase | undefined {
+    if (!typescript.isCallExpression(node)) {
+        return undefined;
+    }
+
+    const callExpression = node as ts.CallExpression;
+
     if (!typescript.isIdentifier(callExpression.expression)) {
         return undefined;
     }
@@ -33,9 +41,12 @@ function tryGetVitestTestCase(
     }
 
     return {
+        type: callExpression.expression.text as TestCaseType,
+        fileName: fileName,
         start: testName.getStart(file),
         end: testName.getEnd(),
-        text: testName.text
+        text: testName.text,
+        parentTexts: parentTexts,
     };
 }
 
@@ -54,9 +65,9 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             text,
             ts.ScriptTarget.Latest
         );
-        const testCases: TextCase[] = [];
+        const testCases: TestCase[] = [];
 
-        visitor(sourceFile);
+        visitor(sourceFile, []);
 
         return flatMap(testCases, x => {
             const start = document.positionAt(x.start);
@@ -65,27 +76,30 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             return [
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
-                    new RunVitestCommand(x.text, document.fileName)
+                    new RunVitestCommand(x)
                 ),
                 new vscode.CodeLens(
                     new vscode.Range(start, end),
-                    new DebugVitestCommand(x.text, document.fileName)
+                    new DebugVitestCommand(x)
                 )
             ];
         });
 
-        function visitor(node: ts.Node) {
+        function visitor(node: ts.Node, parentTexts: string[]) {
             if (token.isCancellationRequested) {
                 return;
             }
 
-            if (ts.isCallExpression(node)) {
-                const testCase = tryGetVitestTestCase(ts, node, sourceFile);
-                if (testCase) {
-                    testCases.push(testCase);
-                }
+            const testCase = tryGetVitestTestCase(ts, node, sourceFile, document.fileName, parentTexts);
+            if (testCase) {
+                const deeperParentTexts = Object.assign([], parentTexts); // copy array
+                deeperParentTexts.push(testCase.text);
+
+                testCases.push(testCase);
+                ts.forEachChild(node, (node: ts.Node) => visitor(node, deeperParentTexts));
+            } else {
+                ts.forEachChild(node, (node: ts.Node) => visitor(node, parentTexts));
             }
-            ts.forEachChild(node, visitor);
         }
     }
 }

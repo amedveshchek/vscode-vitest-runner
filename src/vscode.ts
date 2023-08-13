@@ -1,14 +1,15 @@
 import * as vscode from 'vscode';
 import { debugInTermial, runInTerminal } from './run';
+import { TestCase } from './types';
 
 export class RunVitestCommand implements vscode.Command {
     static ID = 'vitest.runTest';
     title = 'Run(Vitest)';
     command = RunVitestCommand.ID;
-    arguments?: [string, string];
+    arguments?: [TestCase];
 
-    constructor(text: string, filename: string) {
-        this.arguments = [text, filename];
+    constructor(textCase: TestCase) {
+        this.arguments = [textCase];
     }
 }
 
@@ -16,23 +17,23 @@ export class DebugVitestCommand implements vscode.Command {
     static ID = 'vitest.debugTest';
     title = 'Debug(Vitest)';
     command = DebugVitestCommand.ID;
-    arguments?: [string, string];
+    arguments?: [TestCase];
 
-    constructor(text: string, filename: string) {
-        this.arguments = [text, filename];
+    constructor(textCase: TestCase) {
+        this.arguments = [textCase];
     }
 }
 
 vscode.commands.registerCommand(
     RunVitestCommand.ID,
-    (text: string, filename: string) => {
-        runInTerminal(text, filename);
+    (textCase: TestCase) => {
+        runInTerminal(textCase);
     }
 );
 
 vscode.commands.registerCommand(
     DebugVitestCommand.ID,
-    (text: string, filename: string) => {
-        debugInTermial(text, filename);
+    (textCase: TestCase) => {
+        debugInTermial(textCase);
     }
 );
