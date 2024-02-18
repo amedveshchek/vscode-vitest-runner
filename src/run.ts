@@ -26,6 +26,7 @@ function getNodeProjectRootPath(filePath: string): string {
 function getTestCasePatternRegexp(testCase: TestCase): string {
     let caseNamePath = [...testCase.parentTexts, testCase.text].join(' ');
     // escape all the regexp special chars with '\'
+    // https://github.com/vitest-dev/vscode/blob/main/src/pure/runner.ts#L88C25-L88C80
     caseNamePath = caseNamePath.replace(/[*+?$^()[\]{}."]/g, '\\$&');
 
     if (testCase.type === 'describe') {

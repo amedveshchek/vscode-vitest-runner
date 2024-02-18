@@ -65,8 +65,8 @@ export class CodeLensProvider implements vscode.CodeLensProvider {
             text,
             ts.ScriptTarget.Latest
         );
-        const testCases: TestCase[] = [];
 
+        const testCases: TestCase[] = [];
         visitor(sourceFile, []);
 
         return flatMap(testCases, x => {
